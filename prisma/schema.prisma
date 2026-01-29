@@ -13,40 +13,115 @@ datasource db {
   provider = "postgresql"
 }
 
-model StudentProfile{
-  id        String @id @default(cuid())
-  userId    String @unique
-  // user      User   @relation(fields: [userId], references: [id])
 
-  fullName  String
-  phone     String?
-}
+
+////////////////////
+/// TUTOR PROFILE
+////////////////////
 
 model TutorProfile {
-  id          String @id @default(cuid())
-  userId      String @unique
-  // user        User   @relation(fields: [userId], references: [id])
+  id         String @id @default(cuid())
+  userId     String @unique
 
-  fullName    String
-  bio         String
-  expertise   String
-  hourlyRate  Int
-  isApproved  Boolean @default(false)
+  bio        String
+  hourlyRate Float
+  experience Int
+  rating     Float  @default(0)
+
+  // user         User         @relation(fields: [userId], references: [id])
+  // categories   Category[]
+  // availability Availability[]
+  // bookings     Booking[]
+  // reviews      Review[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
+
+////////////////////
+/// CATEGORY
+////////////////////
 
 model Category {
   id    String @id @default(cuid())
   name  String @unique
 
   // tutors TutorProfile[]
+
+  createdAt DateTime @default(now())
 }
 
-model TutorCategory {
-  tutorId    String
-  categoryId String
+////////////////////
+/// AVAILABILITY
+////////////////////
 
+model Availability {
+  id      String @id @default(cuid())
+  tutorId String
+
+  day        String
+  startTime String
+  endTime   String
+
+  // tutor TutorProfile @relation(fields: [tutorId], references: [id])
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////
+/// BOOKING
+////////////////////
+
+model Booking {
+  id        String @id @default(cuid())
+
+  studentId String
+  tutorId   String
+
+  date   DateTime
+  // status BookingStatus @default(CONFIRMED)
+
+  // student User @relation("StudentBookings", fields: [studentId], references: [id])
+  // tutor   User @relation("TutorBookings", fields: [tutorId], references: [id])
+
+  // review Review?
+
+  createdAt DateTime @default(now())
+}
+
+////////////////////
+/// REVIEW
+////////////////////
+
+model Review {
+  id        String @id @default(cuid())
+
+  rating  Int
+  comment String
+
+  studentId String
+  tutorId   String
+  bookingId String @unique
+
+  // student User         @relation(fields: [studentId], references: [id])
   // tutor   TutorProfile @relation(fields: [tutorId], references: [id])
-  // category Category    @relation(fields: [categoryId], references: [id])
+  // booking Booking      @relation(fields: [bookingId], references: [id])
 
-  @@id([tutorId, categoryId])
+  createdAt DateTime @default(now())
+}
+
+////////////////////
+/// ENUMS
+////////////////////
+
+enum Role {
+  STUDENT
+  TUTOR
+  ADMIN
+}
+
+enum BookingStatus {
+  CONFIRMED
+  COMPLETED
+  CANCELLED
 }
