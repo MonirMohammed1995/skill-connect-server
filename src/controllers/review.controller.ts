@@ -1,9 +1,11 @@
 import { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
 
-export const createReview = async (req: Request, res: Response) => {
-  const review = await prisma.review.create({
-    data: req.body,
+export const getTutorReviews = async (req: Request, res: Response) => {
+  const { tutorProfileId } = req.params;
+  const where = typeof tutorProfileId === 'string' ? { tutorId: tutorProfileId } : {};
+  const reviews = await prisma.review.findMany({
+    where,
   });
-  res.json(review);
+  res.json(reviews);
 };
