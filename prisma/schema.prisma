@@ -7,11 +7,11 @@ datasource db {
   provider = "postgresql"
 }
 
-/// /////////////////
-/// USER (Better Auth Base)
-/// /////////////////
+/// ///////////////////
+/// USER MODEL
+/// ///////////////////
 model User {
-  id              String        @id
+  id              String        @id @default(cuid())
   name            String
   email           String        @unique
   emailVerified   Boolean       @default(false)
@@ -19,6 +19,8 @@ model User {
   role            Role          @default(STUDENT)
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+
+  // Relations
   studentBookings Booking[]     @relation("StudentBookings")
   tutorBookings   Booking[]     @relation("TutorBookings")
   reviews         Review[]      @relation("StudentReviews")
@@ -29,9 +31,9 @@ model User {
   @@map("user")
 }
 
-/// /////////////////
+/// ///////////////////
 /// TUTOR PROFILE
-/// /////////////////
+/// ///////////////////
 model TutorProfile {
   id           String         @id @default(cuid())
   userId       String         @unique
@@ -41,56 +43,62 @@ model TutorProfile {
   rating       Float          @default(0)
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+
+  // Relations
+  user         User           @relation(fields: [userId], references: [id])
   availability Availability[]
   bookings     Booking[]      @relation("TutorProfileBookings")
   reviews      Review[]
-  user         User           @relation(fields: [userId], references: [id])
   categories   Category[]     @relation("TutorCategories")
 }
 
-/// /////////////////
+/// ///////////////////
 /// CATEGORY
-/// /////////////////
+/// ///////////////////
 model Category {
   id        String         @id @default(cuid())
   name      String         @unique
   createdAt DateTime       @default(now())
+
   tutors    TutorProfile[] @relation("TutorCategories")
 }
 
-/// /////////////////
+/// ///////////////////
 /// AVAILABILITY
-/// /////////////////
+/// ///////////////////
 model Availability {
   id        String       @id @default(cuid())
   tutorId   String
-  day       String
+  day       Day
   startTime String
   endTime   String
   createdAt DateTime     @default(now())
+
   tutor     TutorProfile @relation(fields: [tutorId], references: [id])
 }
 
-/// /////////////////
+/// ///////////////////
 /// BOOKING
-/// /////////////////
+/// ///////////////////
 model Booking {
   id             String        @id @default(cuid())
   studentId      String
   tutorId        String
-  date           DateTime
-  createdAt      DateTime      @default(now())
-  status         BookingStatus @default(CONFIRMED)
   tutorProfileId String
+  date           DateTime
+  status         BookingStatus @default(CONFIRMED)
+  createdAt      DateTime      @default(now())
+
+  // Relations
   student        User          @relation("StudentBookings", fields: [studentId], references: [id])
   tutor          User          @relation("TutorBookings", fields: [tutorId], references: [id])
   tutorProfile   TutorProfile  @relation("TutorProfileBookings", fields: [tutorProfileId], references: [id])
   review         Review?
 }
 
-/// /////////////////
+/// ///////////////////
 /// REVIEW
-/// /////////////////
+/// ///////////////////
 model Review {
   id        String       @id @default(cuid())
   rating    Int
@@ -104,9 +112,10 @@ model Review {
   tutor     TutorProfile @relation(fields: [tutorId], references: [id])
 }
 
-/// /////////////////
+
+/// ///////////////////
 /// AUTH MODELS
-/// /////////////////
+/// ///////////////////
 model Session {
   id        String   @id
   expiresAt DateTime
@@ -129,6 +138,7 @@ model Account {
   updatedAt  DateTime @updatedAt
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([providerId, accountId])
   @@index([userId])
   @@map("account")
 }
@@ -145,9 +155,9 @@ model Verification {
   @@map("verification")
 }
 
-/// /////////////////
+/// ///////////////////
 /// ENUMS
-/// /////////////////
+/// ///////////////////
 enum Role {
   STUDENT
   TUTOR
@@ -158,4 +168,14 @@ enum BookingStatus {
   CONFIRMED
   COMPLETED
   CANCELLED
+}
+
+enum Day {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
 }

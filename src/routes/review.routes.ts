@@ -7,9 +7,7 @@ import {
 
 const router: Router = Router();
 
-router.use(authMiddleware);
-
-router.post("/", createReview);
+router.post("/", authMiddleware, createReview);
 router.get("/tutor/:tutorProfileId", getTutorReviews);
 
 export default router;

@@ -8,10 +8,8 @@ import {
 
 const router: Router = Router();
 
-router.use(authMiddleware);
-
-router.post("/", createBooking);
-router.get("/me", getMyBookings);
-router.patch("/:id/cancel", cancelBooking);
+router.post("/", authMiddleware, createBooking);
+router.get("/me", authMiddleware, getMyBookings);
+router.patch("/:id/cancel", authMiddleware, cancelBooking);
 
 export default router;
